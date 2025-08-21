@@ -42,7 +42,7 @@ public class testintake extends LinearOpMode {
                 return "Throw out";
             }
         }
-        else if (!isBlueTeam) {
+        else if (!isBlueTeam) { // If it's not blue team
             if (colorSensor.red() > colorSensor.blue()&&colorSensor.red() > colorSensor.green()&&colorSensor.red()>200) {
                 return "Retract";
             }
