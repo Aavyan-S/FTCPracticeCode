@@ -72,17 +72,15 @@ public class testintake extends LinearOpMode {
             telemetry.addData("Touch Sensor", touchSensor.isPressed());
             telemetry.update();
             if (touchSensor.isPressed()) {
-                boolean isBlue = true;
+                telemetry.addLine("Touch Sensor Pressed");
+                leftRoller.setPower(0);
+                rightRoller.setPower(0);
+                sleep(1000);
+                boolean isBlue = false;
                 if (getSampleColor(isBlue).equals("Retract")) {
                     telemetry.addLine("Retracting Slider");
-                    leftRoller.setPower(0);
-                    rightRoller.setPower(0);
-                    sleep(1000);
                 } else if (getSampleColor(isBlue).equals("Throw out")) {
                     telemetry.addLine("Throwing Out");
-                    leftRoller.setPower(0);
-                    rightRoller.setPower(0);
-                    sleep(1000);
                     rightRoller.setPower(-1);
                     leftRoller.setPower(1);
                     sleep(2000);
