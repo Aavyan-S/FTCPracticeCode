@@ -23,6 +23,8 @@ public class MoveSliders extends OpMode {
         }
     }
     public void loop() {
+        telemetry.addData("Left Slider", leftSlider.getCurrentPosition());
+        telemetry.addData("Right Slider", rightSlider.getCurrentPosition());
         move(-1380, leftSlider);
         move(1380, rightSlider);
     }
