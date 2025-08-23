@@ -14,6 +14,7 @@ public class testintake extends LinearOpMode {
     /*
      * Create the hardware variables
      */
+    private MoveSliders moveSliders = new MoveSliders();
     private DcMotor leftSlider;
     private DcMotor rightSlider;
     private CRServo leftRoller;
@@ -25,6 +26,13 @@ public class testintake extends LinearOpMode {
      * Initialize the hardware variables
      */
     public void initialize() {
+        leftSlider = hardwareMap.get(DcMotor.class, "leftSlider");
+        rightSlider = hardwareMap.get(DcMotor.class, "rightSlider");
+        leftSlider.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightSlider.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
         touchSensor = hardwareMap.get(TouchSensor.class, "touchSensor");
         leftRoller = hardwareMap.get(CRServo.class, "leftRoller");
@@ -33,20 +41,35 @@ public class testintake extends LinearOpMode {
     /*
      * Get the sample color
      */
-    public void move(int location, DcMotor slider) {
-        slider.setTargetPosition(location);
-        if (slider.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
-            slider.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        }
-        if (slider.getPower() != 0.3) {
-            slider.setPower(0.3);
-        }
-    }
-    public void stopMotor(DcMotor slider) {
-        if (slider.getPower() != 0) {
-            slider.setPower(0);
-        }
-    }
+//    public void move(int location) {
+//        leftSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        rightSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        leftSlider.setTargetPosition(location);
+//        if (leftSlider.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
+//            leftSlider.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        }
+//        if (leftSlider.getPower() != 0.3) {
+//            leftSlider.setPower(0.3);
+//        }
+//        if (!leftSlider.isBusy()) {
+//            leftSlider.setPower(0);
+//        }
+//        rightSlider.setTargetPosition(location);
+//        if (rightSlider.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
+//            rightSlider.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        }
+//        if (rightSlider.getPower() != 0.3) {
+//            rightSlider.setPower(0.3);
+//        }
+//        if (!rightSlider.isBusy()) {
+//            rightSlider.setPower(0);
+//        }
+//    }
+//    public void stopMotor(DcMotor slider) {
+//        if (slider.getPower() != 0) {
+//            slider.setPower(0);
+//        }
+//    }
     public String getSampleColor(boolean isBlueTeam) {
         if (isBlueTeam) {
             if (colorSensor.blue() > colorSensor.red()&&colorSensor.blue() > colorSensor.green()&&colorSensor.blue()>200) {
@@ -59,7 +82,7 @@ public class testintake extends LinearOpMode {
                 return "Throw out";
             }
         }
-        else if (!isBlueTeam) { // If it's not blue team
+        else { // If it's not blue team
             if (colorSensor.red() > colorSensor.blue()&&colorSensor.red() > colorSensor.green()&&colorSensor.red()>200) {
                 return "Retract";
             }
@@ -70,9 +93,6 @@ public class testintake extends LinearOpMode {
                 return "Throw out";
             }
         }
-        else {
-            return "Error";
-        }
     }
 
     /*
@@ -82,19 +102,19 @@ public class testintake extends LinearOpMode {
     public void runOpMode() {
         initialize();
         waitForStart();
-        move(-1380, leftSlider);
-        move(1380, rightSlider);
-        while(leftSlider.isBusy()){
+        leftRoller.setPower(-1);
+        rightRoller.setPower(1);
+        moveSliders.move(-1000, leftSlider);
+        moveSliders.move(1000, rightSlider);
+        while(leftSlider.isBusy()||rightSlider.isBusy()){
             telemetry.addData("Left Slider", leftSlider.getCurrentPosition());
             telemetry.addData("Right Slider", rightSlider.getCurrentPosition());
             telemetry.addData("Left Busy", leftSlider.isBusy());
             telemetry.addData("Right Busy", rightSlider.isBusy());
             telemetry.update();
         }
-        stopMotor(leftSlider);
-        stopMotor(rightSlider);
-        leftRoller.setPower(-1);
-        rightRoller.setPower(1);
+//        stopMotor(leftSlider);
+//        stopMotor(rightSlider);
         sleep(500); // Give it some time to start moving
         while (opModeIsActive()) {
             telemetry.addData("Touch Sensor", touchSensor.isPressed());
@@ -107,9 +127,9 @@ public class testintake extends LinearOpMode {
                 boolean isBlue = false;
                 if (getSampleColor(isBlue).equals("Retract")) {
                     telemetry.addLine("Retracting");
-                    move(0, leftSlider);
-                    move(0, rightSlider);
-                } else if (getSampleColor(isBlue).equals("Throw out")) {
+                    moveSliders.move(0, leftSlider);
+                    moveSliders.move(0, rightSlider);
+                } else {
                     telemetry.addLine("Throwing Out");
                     rightRoller.setPower(-1);
                     leftRoller.setPower(1);
