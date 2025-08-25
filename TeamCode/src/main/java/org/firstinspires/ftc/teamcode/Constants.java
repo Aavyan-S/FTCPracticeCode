@@ -10,4 +10,6 @@ public class Constants {
     static final public double NO_SAMPLE_DIST=8;
     static final public int EXTEND_INTAKE_SLIDER_POS=1000;
     static final public int RETRACT_INTAKE_SLIDER_POS=-1000;
+    static final public int FRAME_WIDTH=640;
+    static final public int FRAME_HEIGHT=480;
 }

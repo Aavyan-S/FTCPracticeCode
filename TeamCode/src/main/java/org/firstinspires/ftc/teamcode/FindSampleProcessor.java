@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import org.firstinspires.ftc.vision.VisionProcessor;
 
 public class FindSampleProcessor implements VisionProcessor {
-    private final Size frameSize = new Size(640, 480);
+    private final Size frameSize = new Size(Constants.FRAME_WIDTH, Constants.FRAME_HEIGHT);
     private final List<MatOfPoint> contours = new ArrayList<>();
     private final Mat gray = new Mat();
     private final Mat hsv = new Mat();
@@ -59,13 +59,6 @@ public class FindSampleProcessor implements VisionProcessor {
         }
         return contourBounds;
     }
-    public double[] getContoursHue(List<RotatedRect> contours) {
-        double[] contourHue = new double[contours.size()];
-        for(int i = 0; i < contours.size(); i++) {
-            contourHue[i] = getAvgHue(hsv, contours.get(i));
-        }
-        return contourHue;
-    }
     protected double getAvgHue(Mat input, RotatedRect rect) {
         submat=input.submat(rect.boundingRect());
         Scalar color=Core.mean(submat);
@@ -101,7 +94,7 @@ public class FindSampleProcessor implements VisionProcessor {
         return contourDist;
     }
     public List<RotatedRect> sortContours() {
-        ArrayList<RotatedRect> sortedContours = new ArrayList<>(getContourCoords());
+        ArrayList<RotatedRect> sortedContours = new ArrayList<>(getContoursBlue());
         sortedContours.sort(Comparator.comparingInt(c -> (int)-c.angle));
         if (sortedContours.isEmpty()) {
             return null;
