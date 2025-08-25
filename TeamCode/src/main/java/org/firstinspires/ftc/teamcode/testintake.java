@@ -5,8 +5,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
 @TeleOp(name = "Test Intake", group = "Test")
@@ -15,28 +17,31 @@ public class testintake extends LinearOpMode {
      * Create the hardware variables
      */
     private MoveSliders moveSliders = new MoveSliders();
-    private DcMotor leftSlider;
-    private DcMotor rightSlider;
+//    private DcMotor leftSlider;
+//    private DcMotor rightSlider;
     private CRServo leftRoller;
     private CRServo rightRoller;
     private TouchSensor touchSensor;
     private ColorSensor colorSensor;
+    private DistanceSensor distanceSensor;
 
     /*
      * Initialize the hardware variables
      */
     public void initialize() {
-        leftSlider = hardwareMap.get(DcMotor.class, "leftSlider");
-        rightSlider = hardwareMap.get(DcMotor.class, "rightSlider");
-        leftSlider.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightSlider.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        leftSlider = hardwareMap.get(DcMotor.class, "leftSlider");
+//        rightSlider = hardwareMap.get(DcMotor.class, "rightSlider");
+//        leftSlider.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        leftSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        rightSlider.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        rightSlider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+        colorSensor = hardwareMap.get(ColorSensor.class, "colorV3");
+        distanceSensor = hardwareMap.get(DistanceSensor.class, "colorV3");
         touchSensor = hardwareMap.get(TouchSensor.class, "touchSensor");
         leftRoller = hardwareMap.get(CRServo.class, "leftRoller");
         rightRoller = hardwareMap.get(CRServo.class, "rightRoller");
+        moveSliders.initialize(hardwareMap);
     }
     /*
      * Get the sample color
@@ -70,27 +75,35 @@ public class testintake extends LinearOpMode {
 //            slider.setPower(0);
 //        }
 //    }
-    public String getSampleColor(boolean isBlueTeam) {
+    public boolean containsSample(){
+        if (distanceSensor.getDistance(DistanceUnit.CM) < 4.1) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    public boolean getSampleColor(boolean isBlueTeam) {
         if (isBlueTeam) {
-            if (colorSensor.blue() > colorSensor.red()&&colorSensor.blue() > colorSensor.green()&&colorSensor.blue()>200) {
-                return "Retract";
+            if (colorSensor.blue() > colorSensor.red()&&colorSensor.blue() > colorSensor.green()&&colorSensor.blue()>100) {
+                return true;
             }
-            else if (colorSensor.green() > colorSensor.red()&&colorSensor.green() > colorSensor.blue()&&colorSensor.green()>200) {
-                return "Retract";
+            else if (colorSensor.green() > colorSensor.red()&&colorSensor.green() > colorSensor.blue()&&colorSensor.green()>150) {
+                return true;
             }
             else {
-                return "Throw out";
+                return false;
             }
         }
         else { // If it's not blue team
-            if (colorSensor.red() > colorSensor.blue()&&colorSensor.red() > colorSensor.green()&&colorSensor.red()>200) {
-                return "Retract";
+            if (colorSensor.red() > colorSensor.blue()&&colorSensor.red() > colorSensor.green()&&colorSensor.red()>150) {
+                return true;
             }
-            else if (colorSensor.green() > colorSensor.red()&&colorSensor.green() > colorSensor.blue()&&colorSensor.green()>200) {
-                return "Retract";
+            else if (colorSensor.green() > colorSensor.red()&&colorSensor.green() > colorSensor.blue()&&colorSensor.green()>150) {
+                return true;
             }
             else {
-                return "Throw out";
+                return false;
             }
         }
     }
@@ -101,34 +114,35 @@ public class testintake extends LinearOpMode {
     @Override
     public void runOpMode() {
         initialize();
+
         waitForStart();
+        moveSliders.moveInternal(true, telemetry);
+        telemetry.addLine("Sliders Extended");
+        telemetry.update();
         leftRoller.setPower(-1);
         rightRoller.setPower(1);
-        moveSliders.move(-1000, leftSlider);
-        moveSliders.move(1000, rightSlider);
-        while(leftSlider.isBusy()||rightSlider.isBusy()){
-            telemetry.addData("Left Slider", leftSlider.getCurrentPosition());
-            telemetry.addData("Right Slider", rightSlider.getCurrentPosition());
-            telemetry.addData("Left Busy", leftSlider.isBusy());
-            telemetry.addData("Right Busy", rightSlider.isBusy());
-            telemetry.update();
-        }
+        telemetry.addLine("Roller Power Set");
+        telemetry.update();
+        //sleep(10000);
 //        stopMotor(leftSlider);
 //        stopMotor(rightSlider);
-        sleep(500); // Give it some time to start moving
         while (opModeIsActive()) {
-            telemetry.addData("Touch Sensor", touchSensor.isPressed());
+            telemetry.addData("Contains Sample", containsSample());
+            telemetry.addData("Distance", distanceSensor.getDistance(DistanceUnit.CM));
+            telemetry.addData("Status", getSampleColor(false));
+            telemetry.addData("Color Red", colorSensor.red());
+            telemetry.addData("Color Blue", colorSensor.blue());
+            telemetry.addData("Color Green", colorSensor.green());
             telemetry.update();
-            if (touchSensor.isPressed()) {
+            if (containsSample()) {
                 telemetry.addLine("Touch Sensor Pressed");
                 leftRoller.setPower(0);
                 rightRoller.setPower(0);
                 sleep(1000);
-                boolean isBlue = false;
-                if (getSampleColor(isBlue).equals("Retract")) {
+                if (getSampleColor(false)) {
                     telemetry.addLine("Retracting");
-                    moveSliders.move(0, leftSlider);
-                    moveSliders.move(0, rightSlider);
+                    moveSliders.moveInternal(false, telemetry);
+                    sleep(1000);
                 } else {
                     telemetry.addLine("Throwing Out");
                     rightRoller.setPower(-1);
