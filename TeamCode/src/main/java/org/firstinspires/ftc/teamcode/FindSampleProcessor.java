@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import org.firstinspires.ftc.vision.VisionProcessor;
 
 public class FindSampleProcessor implements VisionProcessor {
-    private final Size frameSize = new Size(Constants.FRAME_WIDTH, Constants.FRAME_HEIGHT);
+    public final Size frameSize = new Size(Constants.FRAME_WIDTH, Constants.FRAME_HEIGHT);
     private final List<MatOfPoint> contours = new ArrayList<>();
     private final Mat gray = new Mat();
     private final Mat hsv = new Mat();
